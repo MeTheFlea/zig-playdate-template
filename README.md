@@ -6,7 +6,7 @@ Barebones template for a Playdate game in [Zig](https://ziglang.org/).
 - The SDK wrapper files inside the `src/playdate` folder are very incomplete, though I hope it serves as a useful example of how to add more.
 
 ## Building
-Note: for now I've been using WSL for development but also additionally building a Windows .dll so that I can load it on the Windows simulator. You'll need to adjust `build.zig` to change the `std.zig.CrossTarget` of `simulator_lib` if your setup is different.
+Note: for now I've been using WSL for development so I've also been building a Windows .dll so that I can load it on the Windows simulator. You'll need to adjust `build.zig` to change the `std.zig.CrossTarget` of `simulator_lib` if your setup is different.
 
 ### Nix Flakes
 ```
