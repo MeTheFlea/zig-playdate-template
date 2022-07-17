@@ -44,7 +44,7 @@ pub fn build(b: *std.build.Builder) !void {
     const playdate_copy_step = b.addSystemCommand(&.{ "bash", "-c", try std.fmt.allocPrint(b.allocator, "mv {0s}/libpdex.so {0s}/pdex.so && {1s}/arm-none-eabi/bin/objcopy -O binary zig-out/pdex.elf {0s}/pdex.bin", .{ output_path, eabi_root }) });
     pdc_step.step.dependOn(&playdate_copy_step.step);
 
-    const copy_assets_step = b.addSystemCommand(&.{ "bash", "-c", try std.fmt.allocPrint(b.allocator, "mkdir -p {0s}/assets && cp -r assets/* {0s}/assets", .{output_path}) });
+    const copy_assets_step = b.addSystemCommand(&.{ "bash", "-c", try std.fmt.allocPrint(b.allocator, "cp -r assets/* {0s}", .{output_path}) });
     pdc_step.step.dependOn(&copy_assets_step.step);
 
     if (!b.is_release) {

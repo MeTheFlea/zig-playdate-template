@@ -7,7 +7,7 @@ var current_font: *playdate.graphics.LCDFont = undefined;
 
 export fn handleEvent(event: playdate.SystemEvent) void {
     if (event == playdate.SystemEvent.Init) {
-        current_font = playdate.graphics.loadFont("assets/Roobert-24-Medium.pft") catch unreachable;
+        current_font = playdate.graphics.loadFont("Roobert-24-Medium.pft") catch unreachable;
         playdate.graphics.setFont(current_font);
     }
 }
