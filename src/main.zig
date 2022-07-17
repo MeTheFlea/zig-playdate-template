@@ -20,6 +20,7 @@ export fn update() bool {
 
     const angle = playdate.system.getCrankAngle();
     const str: []u8 = if (is_docked) std.fmt.allocPrint(allocator, "{s}", .{"OPEN THE CRANK"}) catch unreachable else std.fmt.allocPrint(allocator, "{e}", .{angle}) catch unreachable;
+    defer allocator.free(str);
 
     const width = playdate.display.getWidth();
     const height = playdate.display.getHeight();
