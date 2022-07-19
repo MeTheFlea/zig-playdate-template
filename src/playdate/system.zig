@@ -49,21 +49,21 @@ const CallbackWrapper = struct {
         callback();
     }
 };
-pub fn addMenuItem(title: []const u8, callback: fn () void) *MenuItem {
-    const cstr_title = std.cstr.addNullByte(playdate.allocator, title) catch unreachable;
+pub fn addMenuItem(title: []const u8, callback: fn () void) !*MenuItem {
+    const cstr_title = try std.cstr.addNullByte(playdate.allocator, title);
     defer playdate.allocator.free(cstr_title);
 
     return @ptrCast(*anyopaque, playdate.api.system.*.addMenuItem.?(@ptrCast([*c]const u8, cstr_title), callbackWrapper, @intToPtr(*anyopaque, @ptrToInt(callback))));
 }
-pub fn addCheckmarkMenuItem(title: []const u8, value: i32, callback: fn () void) *MenuItem {
-    const cstr_title = std.cstr.addNullByte(playdate.allocator, title) catch unreachable;
+pub fn addCheckmarkMenuItem(title: []const u8, value: bool, callback: fn () void) !*MenuItem {
+    const cstr_title = try std.cstr.addNullByte(playdate.allocator, title);
     defer playdate.allocator.free(cstr_title);
 
-    return @ptrCast(*anyopaque, playdate.api.system.*.addCheckmarkMenuItem.?(@ptrCast([*c]const u8, title), value, callbackWrapper, @intToPtr(*anyopaque, @ptrToInt(callback))));
+    return @ptrCast(*anyopaque, playdate.api.system.*.addCheckmarkMenuItem.?(@ptrCast([*c]const u8, title), if (value) 1 else 0, callbackWrapper, @intToPtr(*anyopaque, @ptrToInt(callback))));
 }
 
-pub fn addOptionsMenuItem(title: []const u8, options: []const [*:0]const u8, callback: fn () void) *MenuItem {
-    const cstr_title = std.cstr.addNullByte(playdate.allocator, title) catch unreachable;
+pub fn addOptionsMenuItem(title: []const u8, options: []const [*:0]const u8, callback: fn () void) !*MenuItem {
+    const cstr_title = try std.cstr.addNullByte(playdate.allocator, title);
     defer playdate.allocator.free(cstr_title);
 
     return @ptrCast(*anyopaque, playdate.api.system.*.addOptionsMenuItem.?(@ptrCast([*c]const u8, cstr_title), @intToPtr([*c][*c]u8, @ptrToInt(options.ptr)), @intCast(c_int, options.len), callbackWrapper, @intToPtr(*anyopaque, @ptrToInt(callback))));
