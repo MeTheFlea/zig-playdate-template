@@ -50,11 +50,6 @@ const CallbackWrapper = struct {
     }
 };
 
-const S = struct {
-    var counter_to_userdata = std.AutoArrayHashMap(usize, UserdataWrapper).init(playdate.allocator);
-    var menu_item_to_counter = std.AutoArrayHashMap(*MenuItem, usize).init(playdate.allocator);
-    var counter: usize = 0;
-};
 pub fn addMenuItem(title: []const u8, callback: fn (userdata: ?*anyopaque) void, userdata: ?*anyopaque) !*MenuItem {
     const cstr_title = try std.cstr.addNullByte(playdate.allocator, title);
     defer playdate.allocator.free(cstr_title);
@@ -63,11 +58,11 @@ pub fn addMenuItem(title: []const u8, callback: fn (userdata: ?*anyopaque) void,
         .callback = callback,
         .userdata = userdata,
     };
-    const ptr = @ptrCast(*MenuItem, playdate.api.system.*.addMenuItem.?(@ptrCast([*c]const u8, cstr_title), callbackWrapper, @intToPtr(?*anyopaque, S.counter)));
+    const ptr = @ptrCast(*MenuItem, playdate.api.system.*.addMenuItem.?(@ptrCast([*c]const u8, cstr_title), callbackWrapper, @intToPtr(?*anyopaque, UserdataTracker.counter)));
 
-    try S.counter_to_userdata.put(S.counter, userdata_wrapper);
-    try S.menu_item_to_counter.put(ptr, S.counter);
-    S.counter += 1;
+    try UserdataTracker.counter_to_userdata.put(UserdataTracker.counter, userdata_wrapper);
+    try UserdataTracker.menu_item_to_counter.put(ptr, UserdataTracker.counter);
+    UserdataTracker.counter += 1;
 
     return ptr;
 }
@@ -79,11 +74,11 @@ pub fn addCheckmarkMenuItem(title: []const u8, value: bool, callback: fn (userda
         .callback = callback,
         .userdata = userdata,
     };
-    const ptr = @ptrCast(*anyopaque, playdate.api.system.*.addCheckmarkMenuItem.?(@ptrCast([*c]const u8, title), if (value) 1 else 0, callbackWrapper, @intToPtr(?*anyopaque, S.counter)));
+    const ptr = @ptrCast(*anyopaque, playdate.api.system.*.addCheckmarkMenuItem.?(@ptrCast([*c]const u8, title), if (value) 1 else 0, callbackWrapper, @intToPtr(?*anyopaque, UserdataTracker.counter)));
 
-    try S.counter_to_userdata.put(S.counter, userdata_wrapper);
-    try S.menu_item_to_counter.put(ptr, S.counter);
-    S.counter += 1;
+    try UserdataTracker.counter_to_userdata.put(UserdataTracker.counter, userdata_wrapper);
+    try UserdataTracker.menu_item_to_counter.put(ptr, UserdataTracker.counter);
+    UserdataTracker.counter += 1;
 
     return ptr;
 }
@@ -97,11 +92,11 @@ pub fn addOptionsMenuItem(title: []const u8, options: []const [*:0]const u8, cal
         .userdata = userdata,
     };
 
-    const ptr = @ptrCast(*anyopaque, playdate.api.system.*.addOptionsMenuItem.?(@ptrCast([*c]const u8, cstr_title), @intToPtr([*c][*c]u8, @ptrToInt(options.ptr)), @intCast(c_int, options.len), callbackWrapper, @intToPtr(?*anyopaque, S.counter)));
+    const ptr = @ptrCast(*anyopaque, playdate.api.system.*.addOptionsMenuItem.?(@ptrCast([*c]const u8, cstr_title), @intToPtr([*c][*c]u8, @ptrToInt(options.ptr)), @intCast(c_int, options.len), callbackWrapper, @intToPtr(?*anyopaque, UserdataTracker.counter)));
 
-    try S.counter_to_userdata.put(S.counter, userdata_wrapper);
-    try S.menu_item_to_counter.put(ptr, S.counter);
-    S.counter += 1;
+    try UserdataTracker.counter_to_userdata.put(UserdataTracker.counter, userdata_wrapper);
+    try UserdataTracker.menu_item_to_counter.put(ptr, UserdataTracker.counter);
+    UserdataTracker.counter += 1;
 
     return ptr;
 }
@@ -112,18 +107,27 @@ pub fn getMenuItemValue(menu_item: *MenuItem) i32 {
     return playdate.api.system.*.getMenuItemValue.?(@ptrCast(*c.PDMenuItem, menu_item));
 }
 pub fn removeMenuItem(menu_item: *MenuItem) void {
-    const counter = S.menu_item_to_counter.get(menu_item);
-    S.menu_item_to_counter.swapRemove(menu_item);
-    S.counter_to_userdata.swapRemove(counter);
+    const counter = UserdataTracker.menu_item_to_counter.get(menu_item);
+    UserdataTracker.menu_item_to_counter.swapRemove(menu_item);
+    UserdataTracker.counter_to_userdata.swapRemove(counter);
 
     playdate.api.system.*.removeMenuItem.?(@ptrCast(*c.PDMenuItem, menu_item));
 }
 pub fn removeAllMenuItems() void {
+    UserdataTracker.menu_item_to_counter.clearAndFree();
+    UserdataTracker.counter_to_userdata.clearAndFree();
+
     playdate.api.system.*.removeAllMenuItems.?();
 }
+
+const UserdataTracker = struct {
+    var counter_to_userdata = std.AutoArrayHashMap(usize, UserdataWrapper).init(playdate.allocator);
+    var menu_item_to_counter = std.AutoArrayHashMap(*MenuItem, usize).init(playdate.allocator);
+    var counter: usize = 0;
+};
 const UserdataWrapper = struct { callback: fn (userdata: ?*anyopaque) void, userdata: ?*anyopaque };
 fn callbackWrapper(userdata: ?*anyopaque) callconv(.C) void {
     const counter = @ptrToInt(userdata);
-    const wrapper = S.counter_to_userdata.get(counter).?;
+    const wrapper = UserdataTracker.counter_to_userdata.get(counter).?;
     wrapper.callback(wrapper.userdata);
 }
