@@ -10,16 +10,18 @@ pub fn build(b: *std.build.Builder) !void {
     // https://play.date/dev/
     const playdate_sdk_path = std.os.getenv("PLAYDATE_SDK_PATH") orelse "";
 
+    const libc_txt_path = "libs/zig-playdate/playdate-libc.txt";
+
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
     const game_name = "zig-playdate-template";
-    const lib = playdate_build.createLib(game_name, "src/main.zig", b, playdate_sdk_path, arm_toolchain_path);
+    const lib = playdate_build.createLib(game_name, "src/main.zig", b, playdate_sdk_path, arm_toolchain_path, libc_txt_path);
     setupZigCommon(b, lib, mode);
     lib.install();
 
-    const game_elf = playdate_build.createElf(b, lib, playdate_sdk_path, arm_toolchain_path);
+    const game_elf = playdate_build.createElf(b, lib, playdate_sdk_path, arm_toolchain_path, libc_txt_path);
     game_elf.setBuildMode(mode);
     game_elf.install();
 
