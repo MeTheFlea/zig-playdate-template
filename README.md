@@ -31,7 +31,7 @@ This project was made using version `1.12.2`. Anything higher is probably okay.
 #### Building
 Once all the requirements are setup:
 ```
-git clone https://github.com/MeTheFlea/zig-playdate-template.git
+git clone --recurse-submodules https://github.com/MeTheFlea/zig-playdate-template.git
 cd zig-playdate-template
 zig build
 ```
