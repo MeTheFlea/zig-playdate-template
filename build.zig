@@ -2,8 +2,7 @@ const std = @import("std");
 
 const playdate_build = @import("zig-playdate-build.zig");
 
-const zig_playdate_pkg = std.build.Pkg{ .name = "zig-playdate", .source = .{ .path = "../zig-playdate/src/main.zig" } };
-const zig_playdate_utils_pkg = std.build.Pkg{ .name = "zig-playdate-utils", .source = .{ .path = "../zig-playdate-utils/src/main.zig" }, .dependencies = &[_]std.build.Pkg{zig_playdate_pkg} };
+const zig_playdate_pkg = std.build.Pkg{ .name = "zig-playdate", .source = .{ .path = "libs/zig-playdate/src/main.zig" } };
 
 pub fn build(b: *std.build.Builder) !void {
     // https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/downloads
@@ -15,7 +14,7 @@ pub fn build(b: *std.build.Builder) !void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    const game_name = "i-am-speed";
+    const game_name = "zig-playdate-template";
     const lib = playdate_build.createLib(game_name, "src/main.zig", b, playdate_sdk_path, arm_toolchain_path);
     setupZigCommon(b, lib, mode);
     lib.install();
@@ -38,5 +37,4 @@ pub fn setupZigCommon(b: *std.build.Builder, step: *std.build.LibExeObjStep, mod
     step.setBuildMode(mode);
 
     step.addPackage(zig_playdate_pkg);
-    step.addPackage(zig_playdate_utils_pkg);
 }

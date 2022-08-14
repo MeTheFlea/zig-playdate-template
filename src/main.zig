@@ -1,14 +1,22 @@
 const std = @import("std");
 const playdate = @import("zig-playdate");
-const utils = @import("zig-playdate-utils");
 
 export fn handleEvent(event: playdate.SystemEvent) void {
-    _ = event;
-    const str = utils.fmt.fmtTime(playdate.allocator, 150.0) catch unreachable;
-    defer playdate.allocator.free(str);
-    playdate.system.logToConsole(str);
+    std.log.info("EVENT: {any}", .{event});
 }
 export fn update() bool {
     playdate.graphics.clear(.White);
+    playdate.system.drawFps(0, 0);
+    playdate.graphics.drawText("hello world!", @divTrunc(playdate.display.getWidth(), 2), @divTrunc(playdate.display.getHeight(), 2));
     return true;
+}
+
+// Define root.log to override the std implementation
+pub fn log(
+    comptime level: std.log.Level,
+    comptime scope: @TypeOf(.EnumLiteral),
+    comptime format: []const u8,
+    args: anytype,
+) void {
+    playdate.log(level, scope, format, args);
 }
