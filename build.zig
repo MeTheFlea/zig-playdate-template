@@ -23,10 +23,14 @@ pub fn build(b: *std.build.Builder) !void {
     game_elf.setBuildMode(mode);
     game_elf.install();
 
-    const simulator_target: ?std.zig.CrossTarget = if (b.is_release) null else std.zig.CrossTarget{
+    const skip_simulator_option = b.option(bool, "skip-simulator", "skip building for the simulator") orelse false;
+    const simulator_target: ?std.zig.CrossTarget = if (skip_simulator_option) null else std.zig.CrossTarget{
         .cpu_arch = .x86_64,
         .os_tag = .windows,
     };
+    if (simulator_target == null) {
+        std.log.info("skipping simulator build", .{});
+    }
     if (playdate_build.setupPDC(b, game_elf, lib, playdate_sdk_path, arm_toolchain_path, game_name, .{}, simulator_target)) |simulator_lib| {
         simulator_lib.setBuildMode(mode);
         simulator_lib.addPackage(zig_playdate_pkg);
