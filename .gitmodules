@@ -1,3 +1,3 @@
 [submodule "libs/zig-playdate"]
 	path = libs/zig-playdate
-	url = git@github.com:MeTheFlea/zig-playdate
+	url = https://github.com/MeTheFlea/zig-playdate
