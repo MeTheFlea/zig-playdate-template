@@ -12,7 +12,7 @@
         type = "tarball";
         flake = false;
     };
-    zig-overlay.url = "github:arqv/zig-overlay";
+    zig-overlay.url = "github:mitchellh/zig-overlay";
   };
 
   outputs = { self, nixpkgs, flake-utils, playdate-sdk, arm-toolchain, zig-overlay }:
@@ -24,7 +24,7 @@
       in rec {
         devShell = pkgs.mkShell {
           packages = with pkgs; [
-            zig-overlay.packages."${system}".master.latest
+            zig-overlay.packages."${system}".master
           ];
           PLAYDATE_SDK_PATH = "${playdate-sdk}";
           ARM_TOOLCHAIN_PATH = "${arm-toolchain}";
